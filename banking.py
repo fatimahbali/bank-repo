@@ -2,10 +2,9 @@ import csv
 import os
 
 
-
 class BankSystem:
 
-    id = '100012'
+    # id = '100012'
     password =""
     accounts = []
     curr_customer = None
@@ -17,24 +16,15 @@ class BankSystem:
 
 # load data from csv file 
     def load_data(self):
-        fieldnames = ["id" , "first_name" ,"last_name" ,"password","checking" , "savings", "active" ,"overdraft_count"]
-        # if not os.path.exists("./bank.csv"):
-        #             with open("./bank.csv", 'w', newline='') as csvfile:
-                        
-        #                     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        #                     writer.writeheader()
-        #                     # for row in fieldnames:
-        #                     #     writer.writerow(row)
-                    
-# 4.0 If Exists - ReadFile / Rows:
+        fieldnames = ["id" ,"first_name" ,"last_name" ,"password" ,"checking" , "savings" ,"active" ,"overdraft_count"]
         try: 
-            with open("bank.csv", "r") as file:
+            with open("bank.csv", "a", newline="") as file:
                 contents = csv.DictReader(file)
                 for row in contents:
-                    # print(row, "line 104") # will print dictionary 
+                    pass
                     for prop in fieldnames:
                         pass
-                        # print(row[prop], "line 106") # will print the value of each individual property
+                       
         except csv.Error as e:
             print(e)
 
@@ -42,49 +32,52 @@ class BankSystem:
     def create_account(cls):
             u = input(" Do you want to create an account ? answer Y or N  : ").strip()
             if u == "Y" or  u == "Y".lower() :
-                s = input("Do you want a saving account type : saving or checking account type : checking or both :").strip()
+                s = input("Do you want a saving account (type : saving ) or checking account (type : checking ) or both :").strip()
                 
-                with open("bank.csv", "r") as file:
-                        contents = csv.DictReader(file)
-                        # for row in contents:
-                        #     idd=int(row["id"])
-                        #     if row["id"].isdigit(): # make sure its number not str
-                        #             return idd
+                first_name= input("Enter your first name: ").strip()
+                last_name= input("Enter your last name: ").strip()
+                password = input("Enter your password : ").strip()
+              
+                active= True
+                overdraft_count=0 
+                fieldnames = ["id", "first_name", "last_name", "password", "active", "overdraft_count", "savings", "checking"]
+                # updating the id 
+                with open("./bank.csv", 'r', newline='') as csvfile:
+                    r = csv.DictReader(csvfile, fieldnames=fieldnames)
+                    max_id=100012
+                    for row in r:
+                        if row["id"].isdigit(): # make sure its number for calculation
+                            max_id=max(max_id, int(row["id"]))
+                    cls.id=str(max_id + 1)
                     
-                        userId = cls.id
-                        cls.id=str(int(cls.id)+1)
-                        # print(cls.id)
-                        # print(f"user id line51 {cls.id}")
-                        # for row in contents:
-                            # if row[0] == id and row[3] == password :
-                        first_name= input("Enter your first name: ").strip()
-                        last_name= input("Enter your last name: ").strip()
-                        password = input("Enter your password : ").strip()
-                        #checking = 0
-                        #savings=0
-                        active= True
-                        overdraft_count=0 ######## make sure id is save
-                        # userId = str(int(max(id))+1) ###### cheak it because its string in csv
-                        new_acc = (f" ID: {cls.id} , First name: {first_name}, Last name : {last_name} , password : {password} , is it active ? : {active}, overdraft_count: {overdraft_count}")
-                        return cls.accounts.append(new_acc)
+                customer_dict = {
+                        "id" : cls.id,
+                        "first_name" :first_name,
+                        "last_name" :last_name,
+                        "password": password,
+                        "checking": False, #default
+                        "savings" : False,
+                        "active" :active ,
+                        "overdraft_count" :overdraft_count
+                    }
                 
-                
+                cls.curr_customer = customer_dict
+                cls.accounts.append(cls.curr_customer)
 
-                if s =="SAVING" or s=="Saving".lower():
-                    savings = 0
-                    checking = None
-                    return cls.saving_account() #اعدل الاسم
-                    
-                  
-            
+               
+                if s =="SAVINGS" or s=="Savings".lower():
+                    cls.savings = 0
+                    cls.checking = False
+                    return cls.saving_account() 
+                
                 elif s =="CHECKING" or s =="checking".lower():
-                    checking = 0
-                    savings = None
+                    cls.checking = 0
+                    cls.savings = False
                     return cls.checking_account()
 
                 else:
-                    checking = 0
-                    savings = 0
+                    cls.checking = 0
+                    cls.savings = 0
                     return cls.both_saving_checking()# both saving & checking
 
                 
@@ -94,7 +87,7 @@ class BankSystem:
                  
             
     @classmethod
-    def loadAccounts(cls):  ######  
+    def loadAccounts(cls):  
         # from load data load the accounts  
         print("***** Loading the accounts from the csv file *****")
         
@@ -106,48 +99,42 @@ class BankSystem:
                 contents = csv.DictReader(file)
                 for row in contents:
                     cls.accounts.append(row)
-                print(f"the accounts list is : {cls.accounts}")
+                #print(f"the accounts list is : {cls.accounts}")
                 return cls.accounts
-            
-                # print(row[prop], "line 106") # will print the value of each individual property
 
         except csv.Error as e:
-            print("Error loading the accounts : {e}")
+            print(f"Error loading the accounts : {e}")
       
-
-       
-
-            
-        
     @classmethod
     def login(cls):
-            print("login function in bank class running!!! line 25")
+            # print("login function in bank class running!!! line 25")
             user_id = input(f"Enter your ID :").strip()
             password = input(f"Enter your password :").strip()
-
-            # for acct in BankSystem.accounts:
-            #     print(acct)
             try:
                 with open("bank.csv", "r") as file:
                     contents = csv.DictReader(file)
                     for row in contents:
                         if row["id"] == user_id and row["password"]== password:
-                                print(f"Login Successfully !!! welcome {row['first_name']}  {row['last_name']}")
-                                cls.curr_customer = row # put the current customer as logged in customer 
-                        # else:
+                                print(f"Login Successfully !!! welcome {row['first_name']} {row['last_name']}")
+                                #Todo: transform the text into dictionary
+                                customer_dict = {
+                                "id" : row["id"],
+                                "first_name" :row["first_name"],
+                                "last_name" :row["last_name"],
+                                "password": row["password"],
+                                "checking": row["checking"],
+                                "savings" : row["savings"],
+                                "active" :row["active"] ,
+                                "overdraft_count" :row["overdraft_count"]
+                            }
+
+                                cls.curr_customer = customer_dict
+                                return 
                     print("Invalid ID or Password , try again ")
                 
             except Exception as e:
                  print(f" error occurred :{e}")
 
-            # if u=="new" or u=="NEW":
-            #     return f"Enter your First name {self.first_name} and Last Name : {self.last_name} and password {self.password} "
-            # if u=="login" or u=="LOGIN" : 
-            #    u = input(f"Enter your id and {self.id} and password {self.password} to log in ")
-            # if self.id in csv: 
-            #     return " Log in Successfully "
-            # else:
-            #        return " Try again , Incorrect Name or Password "
     @classmethod
     def logout(cls):
         if cls.curr_customer:
@@ -158,15 +145,15 @@ class BankSystem:
     
     @classmethod
     def saving_account(cls):
-        if not cls.curr_customer:
+        if not cls.curr_customer: # if its not log in
             print("you must Log in to access , try again ")
             return
          
         sav = cls.curr_customer
-        sav_up=sav.get("saving") # to bring the key saving 
-
+        sav_up=sav.get("savings") # to bring the key saving 
+        print(f" your savings account is : ${sav_up}") 
         if sav_up =="False" or sav_up is False:
-            print(" you dont have a saving account ")
+            print(" you dont have a savings account ")
             return
         
         print(f" your savings account is : ${sav_up}") 
@@ -194,11 +181,11 @@ class BankSystem:
         c = cls.curr_customer
         checking = c.get("checking") # to bring the key checking
 
-        is_checking = checking not in [None , "", False, "False"] # if it has an account not falsy value 
-        is_saving=sav_up not in [None , "", False, "False"] # if it has an account not falsy value 
+        is_checking = checking not in [None , "", False, "False"] # if it has an account not falsey value 
+        is_saving=sav_up not in [None , "", False, "False"] # if it has an account not falsey value 
 
         if is_checking and is_saving :
-            print(f" your saving amount is:  ${sav_up} and your checking amount is : ${checking}")
+            print(f" your saving amount is: ${sav_up} and your checking amount is : ${checking}")
         elif is_checking: # if cheaking == true       
             print(f"you have a checking account with the amount : ${checking}")
         elif is_saving: # if saving == true
@@ -209,111 +196,129 @@ class BankSystem:
               
     
 class Customer:
+    curr_customer=False
     def __init__(self, first_name, last_name, password):
         self.first_name=first_name
         self.last_name=last_name
         self.password = password
         self.id = id
-        # self.create_account = False # assume its false
         self.active = True
-
     
+    # @classmethod
     def info(self):
-        if self.active == True:
-            return f" first name : {self.first_name} last name : {self.last_name} id :{self.id} , your password : {self.password} , your account is active :{self.active}"
+        if not self.curr_customer:
+            self.active==False
+            return f" first name : {self.first_name} last name : {self.last_name} id :{self.id} , your password : {self.password},the state of the account is:{self.active}"
         else:
-             return f" first name : {self.first_name} last name : {self.last_name} id :{self.id} ,your password : {self.password} , account is not active :{self.active}"
+             return f" first name : {self.first_name} last name : {self.last_name} id :{self.id} ,your password : {self.password},the state of the account is:{self.active}"
     
 class operation:
 
     @classmethod
     def Withdraw(cls):
         # should login to Withdraw
-        if  not BankSystem.curr_customer: # it said its not accessd -> add Banksys    
-            print(" you must log in first ")
-            return 
-        acc=input(" from which account you want to make the withdraw (1) saving or (2) checking :").lower()
-        if acc not in ["saving", "checking"]:
-            return "Error , invalid account"
+        acc=input(" from which account you want to make the withdraw (1) savings or (2) checking :").lower()
+        if acc=="1" or acc == "savings":
+            acc="savings"
+
+        elif acc == "2" or acc =="checking":
+            acc = "checking"
+        else:
+            return "Invalid account type"
+    
+            # print(BankSystem.curr_customer)
         
         a=input(" type the money amount you want to make the withdraw with : ").strip()
-        balance= int(BankSystem.curr_customer[acc])# convert it to int to make calculation
+        # print(a)
+        print( a.isnumeric() is True)
+        if a.isnumeric() is True:
+            a= int(a)
+        op=overdraftProtection(BankSystem.curr_customer)
+        success = op.withdraw(acc, a)
+
+        if success:
+            cls.update_acc(BankSystem.curr_customer["id"], acc, BankSystem.curr_customer[acc])
+        else:
+            print("Withdrawal faild")
+        
+        balance = int(BankSystem.curr_customer[acc])# convert it to int to make calculation
         
         if balance >= a: # if account has enough money
             new_b= balance - a
             BankSystem.curr_customer[acc] = str(new_b) # convert it again to string for the csv
-            cls.update_acc(BankSystem.curr_customer["id"], acc, new_b)
+            cls.update_acc(BankSystem.curr_customer["id"], acc, str(new_b))
             print(f"An amount has been withdrawn {a} from account : {acc} and the current balance is:{new_b}")
         else:
-            print("not enough money , it will turn it to negative")
+            new_b= balance - a
+            BankSystem.curr_customer[acc] = str(new_b) # convert it again to string for the csv
+            cls.update_acc(BankSystem.curr_customer["id"], acc, str(new_b))
+            print(f"you withdraw {a} from {acc} with new balance {new_b} Negative")
         
-
-
-        # if its have the money to make Withdraw
-        #Withdraw from saving 
-        # withdraw from checking
-
     @classmethod
     def update_acc(cls,id, column, new_v):
         updated=[]
+        for user in BankSystem.accounts:
+            if user["id"] == id:
+                user[column] = new_v
+                # updated overdraft
+                user["overdraft_count"] =BankSystem.curr_customer.get("overdraft_count", "0")
+                user["active"] = BankSystem.curr_customer.get("active", "True")
+            updated.append(user)
 
-        with open("bank.csv", "r") as file:
-            contents = csv.DictReader(file)
-            for row in contents:
-                if row["id"] == id:
-                    row[column] = str(new_v) # convert it to str
-                    updated.append(row)
-        
-    # if not os.path.exists("./bank.csv"):        
-        fieldnames = ["id" , "first_name" ,"last_name" ,"password","checking" , "savings", "active" ,"overdraft_count"]
 
+        fieldnames = ["id", "first_name", "last_name", "password", "checking", "savings", "active", "overdraft_count"]
         with open("./bank.csv", 'w', newline='') as csvfile:
                     
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writeheader()
-            writer.writerows(updated) # updated the values in csv
+            writer.writerows(BankSystem.accounts) # updated the values in csv
 
+    @classmethod
     def Deposit(cls):
-        if  not BankSystem.curr_customer: # it said its not accessd -> add Banksys    
-            print(" you must log in first ") # if it not logged in
+        if  not BankSystem.curr_customer: # it said its not logged in  
+            print(" you must log in first ") 
             return 
         
-        acc=input(" from which account you want to make the withdraw (1) saving or (2) checking :").lower()
-        if acc not in ["saving", "checking"]:
+        acc=input(" from which account you want to make the withdraw (1) savings or (2) checking :").lower()
+        if acc not in ["savings", "checking"]:
 
             return "Error , invalid account"
         
-        a=input(" type the money amount you want to make the Deposit with : ").strip()
+        a=int(input(" type the money amount you want to make the Deposit with : ").strip())
         balance= int(BankSystem.curr_customer[acc])# convert it to int to make calculation
         new_b= balance + a
         BankSystem.curr_customer[acc] = str(new_b) # convert it again to string for the csv
-        print(f"An amount has been Deposit {a} from account : {acc} and the current balance is:{new_b}")
+        cls.update_acc(BankSystem.curr_customer["id"], acc, str(new_b))
+        print(f"An amount has been Deposit {a} and the current balance is: ${new_b}")
 
+    @classmethod
     def Transfer(cls):
         if  not BankSystem.curr_customer: # it said its not accessd -> add Banksys    
             print(" you must log in first ")
             return 
         print("****Transefer types:****")
-        print("(1) from saving account to the checking account")
-        print("(2) from checking account to the saving account")
+        print("(1) from savings account to the checking account")
+        print("(2) from checking account to the savings account")
         print("(3) from your account to another customer account")
         
         c = input(" choose the transfer type : 1 or 2 or 3 : ").strip()
         if c not in ["1", "2", "3"]:
             return "Invalid choice "
         
-        a=input(" type the money amount you want to make the Transfer with : ").strip()
+        a=int(input(" type the money amount you want to make the Transfer with : ").strip())
         if a<=0:
             return "Enter a valid amount"
-        
+        id = BankSystem.curr_customer["id"]
         if c ==  "1":
-            if int(BankSystem.curr_customer["saving"]) >= a :
-                BankSystem.curr_customer["saving"] =  str(int(BankSystem.curr_customer["saving"] )- a)
-                BankSystem.curr_customer["checking"]  = str(int(BankSystem.curr_customer["checking"] )+ a)
-                print(f"Done Transfering operation with the amount : {a} from saving account to checking account")
+            if int(BankSystem.curr_customer["savings"]) >= a :
+                
+                BankSystem.curr_customer["savings"] =  str(int(BankSystem.curr_customer["savings"] ) - a)
+                BankSystem.curr_customer["checking"]  = str(int(BankSystem.curr_customer["checking"] ) + a)
+                BankSystem.saving_account()
+                print(f"Done Transfering operation with the amount : {a} from savings account to checking account")
                 
                 # updated the data
-                cls.update_acc(id , "saving", BankSystem.curr_customer["saving"])
+                cls.update_acc(id , "savings", BankSystem.curr_customer["savings"])
                 cls.update_acc(id , "checking", BankSystem.curr_customer["checking"])
             else:
                  print("not enough balance to transfere")
@@ -321,16 +326,16 @@ class operation:
         elif c ==  "2":
             if int(BankSystem.curr_customer["checking"]) >= a :
                 BankSystem.curr_customer["checking"] =  str(int(BankSystem.curr_customer["checking"] )- a)
-                BankSystem.curr_customer["saving"]  = str(int(BankSystem.curr_customer["saving"] )+ a)
-                print(f"Done Transfering operation with the amount : {a} from checking account to saving account")
-                
+                BankSystem.curr_customer["savings"]  = str(int(BankSystem.curr_customer["savings"] )+ a)
+                print(f"Done Transfering operation with the amount : {a} from checking account to savings account")
+                id=BankSystem.curr_customer["id"]
                 cls.update_acc(id , "checking", BankSystem.curr_customer["checking"])
-                cls.update_acc(id , "saving", BankSystem.curr_customer["saving"])
+                cls.update_acc(id , "savings", BankSystem.curr_customer["savings"])
             else:
                 print("not enough balance to transfere")
         elif c =="3":
-            ac=input("from which account you want to make the transfere ? saving or checking ").strip()
-            if  ac not in ["saving", "checking"]:
+            ac=input("from which account you want to make the transfere ? savings or checking ").strip()
+            if  ac not in ["savings", "checking"]:
                 print("Incorrect account ")
                 return 
             second_id=input("Enter the id for the user account you want to make the transaction to : ")
@@ -341,7 +346,10 @@ class operation:
                 for row in contents:
                     if row["id"] == second_id:
                         second = True 
-                        row[ac] = str(int(row[ac])) # convert it to str
+                        if row[ac] not in [None, "", "False",False ]:
+                            row[ac]= str(int(row[ac])+a) # convert it to str
+                        else:
+                            row[ac] = str(a)
                     updated.append(row)
             if not second:
                 return "No User Found"
@@ -357,55 +365,79 @@ class operation:
                 writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
                 writer.writeheader()
                 writer.writerows(updated) # updated the values in csv
-            print(f"Done Transfering {a} from your account to user account with number {second_id} ")
+            print(f"Done Transfering ${a} from your account to user account with number {second_id} ")
 
 
+class overdraftProtection:
+    overdraft_fee = 35
+    max_withdraw = 100
+    max_negative_balance = -100
+    max_overdrafts = 2
 
+    def __init__(self, customer):
+        self.customer=customer
 
-# class checking_account(BankSystem):
-#     def __init__(self):
-#         super().__init__(id, self.password)
-#         self.checking=False
+    # if account is deactivated 
+    def withdraw(self, acc_type, a):
+        if self.customer.get("active") in ["False", False]:
+            print("Your account is deactivated. Please deposit funds to reactivate.")
+            return False
+        # if it is more than 100 
+        if a > self.max_withdraw:
+            print(f"Cannot withdraw more than ${self.max_withdraw} at once.")
+            return False
+
+        # initialize overdraft_count 
+        overdraft_count = int(self.customer.get("overdraft_count", "0") or "0")
+        balance = int(self.customer.get(acc_type, "0")) # get account balance first
+        new_b = balance - a # updated
+
+        # if it is less than 100 -> denied
+        if new_b < self.max_negative_balance:
+            print(f"Cannot overdraft because ${self.max_negative_balance} Withdrawal denied.")
+            return False
+        
+        # if account balance -> in negative discount 35 , updated overdraft
+        if new_b < 0:
+            new_b = new_b - self.overdraft_fee
+            overdraft_count += 1
+            print(f"Overdraft fee of ${self.overdraft_fee} applied.")
+            print(f"Overdraft count: {overdraft_count}")
+            self.customer["overdraft_count"] = str(overdraft_count)
+            # if its more than 2  draws stop the account
+            if overdraft_count >= self.max_overdrafts:
+                self.customer["active"] = "False"
+                print("Account deactivated due to exceeding overdraft limit.")
+
+        self.customer[acc_type] = str(new_b)
+        # print(f"Withdrawal successful. New {acc_type} balance: ${new_b}")
+        return True
+
+        
+    def deposit(self, acc_type, a):
+            # cal new balance
+            balance = int(self.customer.get(acc_type, "0"))
+            new_b = balance + a
+            self.customer[acc_type] = str(new_b)
+            print(f"Deposit successful new {acc_type} balance is : {new_b}")
+            self.check_reactive()
 
     
-#     def checking_account(self):
+    def check_reactive(self):
 
-#         if self.id and self.password in csv : # check if id and password match 
-#             return f"Customer has an account id :{self.id} , and your checking is :{self.checking}"
-#         elif self.checking == False:
-#             return " you don't have a checking account "
-#         elif type(self.checking) == str:
-#                 self.checking = int(self.checking)
-#                 return self.checking
-#         else:
-#             print(" you dont have a checking account , you need to Make a new Account")
-    
+        checking=int(self.customer.get("checking", "0"))
+        savings =int(self.customer.get("savings", "0"))
+        total=checking + savings # calc total of 2 accounts
+        #activate again
+        if total >= 0 and self.customer.get("active") in ["False", False]:
+            self.customer["active"] = "True"
+            self.customer["overdraft_count"] = "0"
+            print("Account reactivated because of sufficient balance.")
 
-
-
-# class saving_acccount(BankSystem):
-#     def __init__(self):
-#         super().__init__(id, self.password)
-#         self.saving=False
-
-#     def saving_account(self):
-        
-#         if self.id and self.password in csv : # in csv
-#             return f" you have a saving account  :{self.id} and your saving is : {self.saving}"
-#         elif self.saving==False:
-#             return "you dont have a saving account"
-#         elif type(self.saving) == str:
-#                 self.saving = int(self.saving)
-#                 return self.saving
-#         else:
-#             return " you don't have saving account"
-        
-        
 
 def init():
     print("****Hi! Welcome to the ACM bank!!!****")
     # BankSystem.loadAccounts()
-    BankSystem()
     main_menu_choice = None
     main_menu_options = ["1", "2", "3", "q"]
     while not main_menu_choice or  main_menu_choice not in main_menu_options:
@@ -414,8 +446,12 @@ def init():
 
     if main_menu_choice == "1":
         BankSystem.login()
+        if not BankSystem.curr_customer:
+            print("login failed")
+            return
+
     if main_menu_choice == "2":
-        # print("user chose number 2")
+        # print("user choose number 2")
         BankSystem.create_account()
         print(BankSystem.accounts)
         # not working 
@@ -426,20 +462,27 @@ def init():
 
 def init2():
      main_menu_choice2 = None
-     main_menu2 = ["1", "2", "3", "q"]
+     main_menu2 = ["1", "2", "3", "q", "4"]
      while not main_menu_choice2 or main_menu_choice2 not in main_menu2:
-        main_menu_choice2 = input(" Hi ! what operation Do you want to make ?  (1) Withdraw  or (2) Deposit or (3) Transfer ")
+        main_menu_choice2 = input(" Hi ! what operation Do you want to make ?  (1) Withdraw  or (2) Deposit or (3) Transfer (4) log out  ")
         print(main_menu_choice2)
 
         if main_menu_choice2 == "1":
             operation.Withdraw()
+            
+            print("Customer status:", BankSystem.curr_customer)
         if main_menu_choice2 == "2":
-             operation.Deposit()
+            operation.Deposit()
+            print("Customer status:", BankSystem.curr_customer)
         if main_menu_choice2 == "3":
-            pass           
+           operation.Transfer()  
+        
+        if main_menu_choice2 == "4":
+           BankSystem.logout()  
          
 
 init()
 init2()
+
 
              
