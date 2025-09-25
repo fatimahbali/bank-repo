@@ -14,20 +14,6 @@ class BankSystem:
     def __init__(self):
         pass
 
-# load data from csv file 
-    def load_data(self):
-        fieldnames = ["id" ,"first_name" ,"last_name" ,"password" ,"checking" , "savings" ,"active" ,"overdraft_count"]
-        try: 
-            with open("bank.csv", "a", newline="") as file:
-                contents = csv.DictReader(file)
-                for row in contents:
-                    pass
-                    for prop in fieldnames:
-                        pass
-                       
-        except csv.Error as e:
-            print(e)
-
     @classmethod
     def create_account(cls):
             u = input(" Do you want to create an account ? answer Y or N  : ").strip()
@@ -74,7 +60,14 @@ class BankSystem:
                     cls.checking = 0
                     cls.savings = False
                     return cls.checking_account()
-
+                
+                elif s=="both" or s=="BOTH".lower():
+                    cls.checking = 0
+                    cls.savings = 0
+                    cls.curr_customer["checking"] = "0"
+                    cls.curr_customer["savings"] = "0"
+                    return cls.both_saving_checking()
+                
                 else:
                     cls.checking = 0
                     cls.savings = 0
@@ -176,7 +169,7 @@ class BankSystem:
               print("you must Log in to access")
               return 
         sav = cls.curr_customer
-        sav_up=sav.get("saving") # to bring the key saving 
+        sav_up=sav.get("savings") # to bring the key saving 
 
         c = cls.curr_customer
         checking = c.get("checking") # to bring the key checking
@@ -197,21 +190,23 @@ class BankSystem:
     
 class Customer:
     curr_customer=False
-    def __init__(self, first_name, last_name, password):
+    def __init__(self,id, first_name, last_name, password,savings, checking, active=True):
+
         self.first_name=first_name
         self.last_name=last_name
         self.password = password
         self.id = id
-        self.active = True
+        self.active = active
+        self.savings=savings
+        self.checking=checking
     
     # @classmethod
     def info(self):
-        if not self.curr_customer:
-            self.active==False
-            return f" first name : {self.first_name} last name : {self.last_name} id :{self.id} , your password : {self.password},the state of the account is:{self.active}"
+        if str(self.active).lower() =="False":
+            print(f"Customer Info : ID: {self.id}, Name : {self.first_name}{self.last_name}, password :{self.password} , saving:{self.savings}, checking:{self.checking} Active: {self.active}")
         else:
-             return f" first name : {self.first_name} last name : {self.last_name} id :{self.id} ,your password : {self.password},the state of the account is:{self.active}"
-    
+            print(f"Customer Info : ID: {self.id}, Name : {self.first_name}{self.last_name}, password :{self.password} ,saving:{self.savings}, checking:{self.checking}, Active: {self.active}")
+
 class operation:
 
     @classmethod
@@ -436,12 +431,12 @@ class overdraftProtection:
 
 
 def init():
-    print("****Hi! Welcome to the ACM bank!!!****")
+    print("****Welcome to the ACM bank!!!****")
     # BankSystem.loadAccounts()
     main_menu_choice = None
     main_menu_options = ["1", "2", "3", "q"]
     while not main_menu_choice or  main_menu_choice not in main_menu_options:
-        main_menu_choice = input("Would you like to (1) login or (2) create an account? or (3) to logout or type 'q' to quit. ")
+        main_menu_choice = input("Would you like to (1)login or (2)create an account? or (3)logout or type 'q' to quit. ").strip()
         print(main_menu_choice)
 
     if main_menu_choice == "1":
@@ -456,29 +451,46 @@ def init():
         print(BankSystem.accounts)
         # not working 
     if main_menu_choice == "3":
-        print("user chose number 3")
+        # print("user chose number 3")
         BankSystem.logout()
+    if main_menu_choice == "q":
+        print("Good bye")
+        quit()
+       
+
 
 
 def init2():
      main_menu_choice2 = None
-     main_menu2 = ["1", "2", "3", "q", "4"]
+     main_menu2 = ["1", "2", "3", "q", "4", "5"]
      while not main_menu_choice2 or main_menu_choice2 not in main_menu2:
-        main_menu_choice2 = input(" Hi ! what operation Do you want to make ?  (1) Withdraw  or (2) Deposit or (3) Transfer (4) log out  ")
+        main_menu_choice2 = input("**what operation Do you want to make ?(1) Withdraw  or (2) Deposit or (3) Transfer (4) log out (5)account Info: ").strip()
         print(main_menu_choice2)
 
         if main_menu_choice2 == "1":
             operation.Withdraw()
-            
             print("Customer status:", BankSystem.curr_customer)
+
         if main_menu_choice2 == "2":
             operation.Deposit()
             print("Customer status:", BankSystem.curr_customer)
+
         if main_menu_choice2 == "3":
            operation.Transfer()  
         
         if main_menu_choice2 == "4":
            BankSystem.logout()  
+        
+        if main_menu_choice2 == "5":
+            c= Customer(
+            id=BankSystem.curr_customer["id"],
+            first_name=BankSystem.curr_customer["first_name"],
+            last_name=BankSystem.curr_customer["last_name"],
+            password=BankSystem.curr_customer["password"],
+            savings=BankSystem.curr_customer["savings"],
+            checking=BankSystem.curr_customer["checking"],
+            active=BankSystem.curr_customer["active"],)
+            c.info()
          
 
 init()
